@@ -12,13 +12,16 @@ function getLocale(request: NextRequest): string {
   return "id";
 }
 
-const publicPaths = ["/signin", "/api/auth/:path*", "/api/public/:path*", "/api/wilayah/:path*"];
-
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
 
-  const isSignInPage = pathname === "/signin";
+  const isPublicPath =
+    pathname === "/" ||
+    pathname === "/signin" ||
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/public") ||
+    pathname.startsWith("/api/wilayah");
 
   const response = NextResponse.next();
 
@@ -31,13 +34,8 @@ export async function proxy(req: NextRequest) {
     });
   }
 
-  const isPublicApi =
-    pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/public") ||
-    pathname.startsWith("/api/wilayah");
-
-  if (isSignInPage || isPublicApi) {
-    if (isSignInPage && token) {
+  if (isPublicPath) {
+    if (pathname === "/signin" && token) {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
     return response;
