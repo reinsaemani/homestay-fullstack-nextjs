@@ -19,6 +19,7 @@ export async function proxy(req: NextRequest) {
   const isPublicPath =
     pathname === "/" ||
     pathname === "/signin" ||
+    pathname.startsWith("/images") ||
     pathname.startsWith("/api/auth") ||
     pathname.startsWith("/api/public") ||
     pathname.startsWith("/api/wilayah");
@@ -56,6 +57,6 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|api/auth|api/public|api/wilayah).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images|api/auth|api/public|api/wilayah).*)",
   ],
 };
