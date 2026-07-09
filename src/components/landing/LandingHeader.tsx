@@ -18,6 +18,7 @@ export default function LandingHeader() {
             width={40}
             height={40}
             className="rounded"
+            unoptimized
           />
           <span className="text-lg font-semibold text-gray-900 dark:text-white">
             Bee Nirwana Homestay
