@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import type { EventContentArg } from "@fullcalendar/core";
@@ -22,23 +22,37 @@ export default function BookingCalendar() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
 
+  const abortRef = useRef<AbortController | null>(null);
+  const initialRef = useRef(true);
+
   const fetchBookings = useCallback(async (month: string) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     try {
-      const res = await fetch(`/api/public/bookings?month=${month}`);
+      const res = await fetch(`/api/public/bookings?month=${month}`, {
+        signal: controller.signal,
+      });
       if (res.ok) {
         const data = await res.json();
-        setBookings(data);
+        if (!controller.signal.aborted) {
+          setBookings(data);
+        }
       }
     } catch {
       // silent fail
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     fetchBookings(currentMonth);
+    return () => abortRef.current?.abort();
   }, [currentMonth, fetchBookings]);
 
   const events = bookings.map((booking) => ({
@@ -55,6 +69,10 @@ export default function BookingCalendar() {
   }));
 
   const handleDatesSet = (arg: { start: Date }) => {
+    if (initialRef.current) {
+      initialRef.current = false;
+      return;
+    }
     const year = arg.start.getFullYear();
     const month = String(arg.start.getMonth() + 1).padStart(2, "0");
     setCurrentMonth(`${year}-${month}`);
