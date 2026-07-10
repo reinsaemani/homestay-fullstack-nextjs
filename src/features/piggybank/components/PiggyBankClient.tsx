@@ -6,6 +6,7 @@ import { formatIDR } from "@/components/common/CurrencyDisplay";
 import Pagination from "@/components/tables/Pagination";
 import { useLocale } from "@/context/LocaleContext";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +16,7 @@ interface PiggyEntry {
   amount: number;
   type: "IN" | "OUT";
   date: string;
+  rawDate: string;
   createdAt: string;
 }
 
@@ -25,6 +27,7 @@ export default function PiggyBankClient() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<PiggyEntry | null>(null);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<"IN" | "OUT">("IN");
@@ -49,45 +52,79 @@ export default function PiggyBankClient() {
         data.entries.map((e: { id: string; description: string; amount: number; type: "IN" | "OUT"; date: string; createdAt: string }) => ({
           ...e,
           amount: Number(e.amount),
+          rawDate: e.date.slice(0, 10),
           date: new Date(e.date).toLocaleDateString("id-ID"),
           createdAt: new Date(e.createdAt).toLocaleDateString("id-ID"),
         })),
       );
       setTotal(data.balance);
     } catch {
-      // silent
+      toast.error(t.common.errorOccurred);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchEntries();
   }, []);
+
+  const openAddForm = () => {
+    setEditingEntry(null);
+    setDescription("");
+    setAmount("");
+    setType("IN");
+    setEntryDate(toLocalDateString(new Date()));
+    setShowForm(true);
+  };
+
+  const openEditForm = (entry: PiggyEntry) => {
+    setEditingEntry(entry);
+    setDescription(entry.description);
+    setAmount(entry.amount.toString());
+    setType(entry.type);
+    setEntryDate(entry.rawDate);
+    setShowForm(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description || !amount) return;
     setSaving(true);
     try {
-      await fetch("/api/piggybank", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          description,
-          amount: Number(amount),
-          type,
-          date: entryDate,
-        }),
-      });
+      if (editingEntry) {
+        await fetch(`/api/piggybank/${editingEntry.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description,
+            amount: Number(amount),
+            type,
+            date: entryDate,
+          }),
+        });
+      } else {
+        await fetch("/api/piggybank", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            description,
+            amount: Number(amount),
+            type,
+            date: entryDate,
+          }),
+        });
+      }
       setDescription("");
       setAmount("");
       setType("IN");
       setEntryDate(toLocalDateString(new Date()));
       setShowForm(false);
+      setEditingEntry(null);
+      toast.success(editingEntry ? t.piggyBank.updated : t.piggyBank.created);
       fetchEntries();
     } catch {
-      // silent
+      toast.error(t.common.errorOccurred);
     } finally {
       setSaving(false);
     }
@@ -104,9 +141,10 @@ export default function PiggyBankClient() {
       });
 
       setDeleteId(null);
+      toast.success(t.piggyBank.deleted);
       fetchEntries();
     } catch {
-      // silent
+      toast.error(t.common.errorOccurred);
     } finally {
       setDeleting(false);
     }
@@ -169,7 +207,7 @@ export default function PiggyBankClient() {
           <Button size="sm" variant="outline" onClick={handleDownload}>
             {t.piggyBank.downloadCsv}
           </Button>
-          <Button size="sm" onClick={() => setShowForm(true)}>
+          <Button size="sm" onClick={openAddForm}>
             + {t.piggyBank.addEntry}
           </Button>
         </div>
@@ -232,12 +270,20 @@ export default function PiggyBankClient() {
                     {entry.date}
                   </td>
                   <td className="px-5 py-4 text-right">
-                    <button
-                      onClick={() => setDeleteId(entry.id)}
-                      className="text-sm text-red-500 hover:text-red-700"
-                    >
-                      {t.common.delete}
-                    </button>
+                    <div className="flex justify-end gap-3">
+                      <button
+                        onClick={() => openEditForm(entry)}
+                        className="text-sm text-brand-500 hover:text-brand-700"
+                      >
+                        {t.common.edit}
+                      </button>
+                      <button
+                        onClick={() => setDeleteId(entry.id)}
+                        className="text-sm text-red-500 hover:text-red-700"
+                      >
+                        {t.common.delete}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -258,9 +304,9 @@ export default function PiggyBankClient() {
         </div>
       )}
 
-      <Modal isOpen={showForm} onClose={() => setShowForm(false)} className="max-w-[400px] p-6">
+      <Modal isOpen={showForm} onClose={() => { setShowForm(false); setEditingEntry(null); setDescription(""); setAmount(""); setType("IN"); }} className="max-w-[400px] p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
-          {t.piggyBank.addEntryTitle}
+          {editingEntry ? t.piggyBank.editEntryTitle : t.piggyBank.addEntryTitle}
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -3,6 +3,8 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import BookingForm from "@/features/bookings/components/BookingForm";
 import type { BookingFormData } from "@/features/bookings/types";
+import { useLocale } from "@/context/LocaleContext";
+import { toast } from "sonner";
 
 interface EditBookingFormProps {
   displayId: string;
@@ -13,6 +15,7 @@ export default function EditBookingForm({
   displayId,
   initialData,
 }: EditBookingFormProps) {
+  const { t } = useLocale();
   const router = useRouter();
   const [loading, setLoading] = React.useState(false);
 
@@ -27,9 +30,11 @@ export default function EditBookingForm({
 
       if (!res.ok) throw new Error("Failed to update booking");
 
+      toast.success(t.editBooking.updated);
       router.push(`/bookings/${displayId}`);
       router.refresh();
     } catch {
+      toast.error(t.editBooking.errorOccurred);
       setLoading(false);
     }
   };

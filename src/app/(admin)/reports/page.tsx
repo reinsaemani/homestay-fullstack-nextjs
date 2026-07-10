@@ -23,6 +23,8 @@ const MONTHS = [
   "07", "08", "09", "10", "11", "12",
 ];
 
+const WEEK_OPTIONS = [1, 2, 3, 4];
+
 function getYearOptions() {
   const currentYear = new Date().getFullYear();
   const years: number[] = [];
@@ -32,6 +34,10 @@ function getYearOptions() {
   return years;
 }
 
+function formatRupiah(value: number): string {
+  return `Rp ${value.toLocaleString("id-ID")}`;
+}
+
 export default function ReportsPage() {
   const { t } = useLocale();
   const [period, setPeriod] = useState<Period>("monthly");
@@ -39,7 +45,7 @@ export default function ReportsPage() {
   const [month, setMonth] = useState(
     String(new Date().getMonth() + 1).padStart(2, "0"),
   );
-  const [week, setWeek] = useState("01");
+  const [week, setWeek] = useState("1");
   const [data, setData] = useState<{ items: { date: string; income: number }[]; total: number } | null>(null);
   const [loading, setLoading] = useState(false);
   const [reportPage, setReportPage] = useState(1);
@@ -47,7 +53,7 @@ export default function ReportsPage() {
   const getValue = useCallback(() => {
     if (period === "yearly") return year;
     if (period === "monthly") return `${year}-${month}`;
-    return `${year}-W${week}`;
+    return `${year}-${month}-${week}`;
   }, [period, year, month, week]);
 
   const fetchData = useCallback(async () => {
@@ -71,9 +77,27 @@ export default function ReportsPage() {
 
   const handleDownloadCSV = () => {
     if (!data || data.items.length === 0) return;
-    const header = `${t.reports.paymentDate},${t.reports.income}`;
-    const rows = data.items.map((item) => `${item.date},${item.income}`);
-    const csv = [header, ...rows].join("\n");
+
+    const rows: string[] = [];
+
+    if (period === "yearly") {
+      rows.push(`Bulan,${t.reports.income}`);
+      for (const item of data.items) {
+        const monthName = new Date(2000, Number(item.date.slice(5, 7)) - 1).toLocaleString("id-ID", { month: "long" });
+        rows.push(`${monthName},${item.income}`);
+      }
+      rows.push("");
+      rows.push(`${t.reports.totalIncome},${data.total}`);
+    } else {
+      rows.push(`${t.reports.paymentDate},${t.reports.income}`);
+      for (const item of data.items) {
+        rows.push(`${item.date},${item.income}`);
+      }
+      rows.push("");
+      rows.push(`${t.reports.totalIncome},${data.total}`);
+    }
+
+    const csv = rows.join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -119,7 +143,7 @@ export default function ReportsPage() {
                 <option key={y} value={y}>{y}</option>
               ))}
             </select>
-            {period === "monthly" && (
+            {(period === "weekly" || period === "monthly") && (
               <select
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
@@ -137,9 +161,8 @@ export default function ReportsPage() {
                 onChange={(e) => setWeek(e.target.value)}
                 className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
               >
-                <option value="">{t.reports.selectWeek}</option>
-                {Array.from({ length: 53 }, (_, i) => i + 1).map((w) => (
-                  <option key={w} value={String(w).padStart(2, "0")}>
+                {WEEK_OPTIONS.map((w) => (
+                  <option key={w} value={w}>
                     {t.reports.weekPrefix}{w}
                   </option>
                 ))}
@@ -156,13 +179,10 @@ export default function ReportsPage() {
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
           {loading ? (
             <div className="p-6">
-              <LoadingSkeleton rows={5} columns={2} />
+              <LoadingSkeleton rows={5} columns={period === "yearly" ? 2 : 2} />
             </div>
           ) : !data || data.items.length === 0 ? (
-            <EmptyState
-              title={t.reports.noData}
-              description=""
-            />
+            <EmptyState title={t.reports.noData} description="" />
           ) : (
             <>
               <div className="max-w-full overflow-x-auto">
@@ -171,7 +191,7 @@ export default function ReportsPage() {
                     <TableHeader className="border-b border-gray-100 dark:border-white/[0.05]">
                       <TableRow>
                         <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                          {t.reports.paymentDate}
+                          {period === "yearly" ? t.reports.month : t.reports.paymentDate}
                         </TableCell>
                         <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                           {t.reports.income}
@@ -179,16 +199,21 @@ export default function ReportsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                      {data.items.slice((reportPage - 1) * REPORT_PAGE_SIZE, reportPage * REPORT_PAGE_SIZE).map((item, idx) => (
+                      {(period === "yearly"
+                        ? data.items
+                        : data.items.slice((reportPage - 1) * REPORT_PAGE_SIZE, reportPage * REPORT_PAGE_SIZE)
+                      ).map((item, idx) => (
                         <TableRow key={idx}>
                           <TableCell className="px-5 py-4 sm:px-6 text-start">
                             <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
-                              {item.date}
+                              {period === "yearly"
+                                ? new Date(2000, Number(item.date.slice(5, 7)) - 1).toLocaleString("id-ID", { month: "long" })
+                                : item.date}
                             </span>
                           </TableCell>
                           <TableCell className="px-5 py-4 sm:px-6 text-start">
                             <span className="text-gray-500 text-theme-sm dark:text-gray-400">
-                              Rp {item.income.toLocaleString("id-ID")}
+                              {formatRupiah(item.income)}
                             </span>
                           </TableCell>
                         </TableRow>
@@ -197,7 +222,7 @@ export default function ReportsPage() {
                   </Table>
                 </div>
               </div>
-              {data.items.length > REPORT_PAGE_SIZE && (
+              {period !== "yearly" && data.items.length > REPORT_PAGE_SIZE && (
                 <div className="flex justify-end px-5 py-4 border-t border-gray-100 dark:border-white/[0.05]">
                   <Pagination
                     currentPage={reportPage}
@@ -213,7 +238,7 @@ export default function ReportsPage() {
                   {t.reports.totalIncome}
                 </span>
                 <span className="text-sm font-semibold text-brand-500">
-                  Rp {data.total.toLocaleString("id-ID")}
+                  {formatRupiah(data.total)}
                 </span>
               </div>
             </>

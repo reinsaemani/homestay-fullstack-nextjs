@@ -52,7 +52,7 @@ export default async function AdminDashboard() {
         <BookingTrendChart data={trends} />
       </div>
 
-      <div className="col-span-12 xl:col-span-7">
+      <div className="col-span-12">
         <UpcomingBookings bookings={upcoming} />
       </div>
     </div>

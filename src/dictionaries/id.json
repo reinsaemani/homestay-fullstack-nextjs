@@ -19,7 +19,8 @@
     "or": "atau",
     "view": "Lihat",
     "note": "Catatan",
-    "created": "Dibuat"
+    "created": "Dibuat",
+    "errorOccurred": "Terjadi kesalahan"
   },
   "landing": {
     "siteName": "Bee Nirwana Homestay",
@@ -134,7 +135,8 @@
     "cancelBooking": "Batalkan Pemesanan",
     "confirm": "Konfirmasi",
     "failedUpdate": "Gagal memperbarui status",
-    "errorOccurred": "Terjadi kesalahan"
+    "errorOccurred": "Terjadi kesalahan",
+    "statusUpdated": "Status berhasil diperbarui"
   },
   "newBooking": {
     "title": "Pemesanan Baru - Bee Nirwana Homestay",
@@ -162,7 +164,9 @@
     "createBooking": "Buat Pemesanan",
     "updateBooking": "Perbarui Pemesanan",
     "saving": "Menyimpan...",
-    "checkOutAfterCheckIn": "Check-out harus setelah check-in"
+    "checkOutAfterCheckIn": "Check-out harus setelah check-in",
+    "created": "Pemesanan berhasil dibuat",
+    "errorOccurred": "Gagal membuat pemesanan"
   },
   "editBooking": {
     "title": "Edit Pemesanan - Bee Nirwana Homestay",
@@ -170,7 +174,9 @@
     "pageTitle": "Edit Pemesanan",
     "editBookingInfo": "Edit Informasi Pemesanan",
     "notFound": "Pemesanan Tidak Ditemukan",
-    "notFoundDesc": "Pemesanan tidak ditemukan."
+    "notFoundDesc": "Pemesanan tidak ditemukan.",
+    "updated": "Pemesanan berhasil diperbarui",
+    "errorOccurred": "Gagal memperbarui pemesanan"
   },
   "status": {
     "BOOKED": "Dipesan",
@@ -203,7 +209,8 @@
     "download": "Download CSV",
     "noData": "Tidak ada data untuk periode ini",
     "weekPrefix": "Minggu ke-",
-    "totalIncome": "Total Pendapatan"
+    "totalIncome": "Total Pendapatan",
+    "month": "Bulan"
   },
   "piggyBank": {
   "pageTitle": "Celengan",
@@ -222,13 +229,17 @@
   "date": "Tanggal",
   "action": "Aksi",
   "addEntryTitle": "Tambah Entri Celengan",
+  "editEntryTitle": "Edit Entri Celengan",
   "save": "Simpan",
   "saving": "Menyimpan...",
   "cancel": "Batal",
   "delete": "Hapus",
   "deleteTitle": "Hapus Entri",
   "deleteConfirmation": "Apakah Anda yakin ingin menghapus entri ini? Tindakan ini tidak dapat dibatalkan.",
-  "noEntries": "Belum ada entri"
+  "noEntries": "Belum ada entri",
+  "created": "Entri berhasil ditambahkan",
+  "updated": "Entri berhasil diperbarui",
+  "deleted": "Entri berhasil dihapus"
 },
   "footer": {
     "copyright": "\u00a9 {year} - Bee Nirwana Homestay"

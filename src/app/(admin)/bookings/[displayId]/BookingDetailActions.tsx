@@ -5,6 +5,7 @@ import BookingActions from "@/features/bookings/components/BookingActions";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
 import type { BookingStatus } from "@/features/bookings/types";
 import { useLocale } from "@/context/LocaleContext";
+import { toast } from "sonner";
 
 function formatTimeInput(dateStr?: string): string {
   if (!dateStr) return "10:00";
@@ -53,9 +54,11 @@ export default function BookingDetailActions({
       }
 
       setConfirmAction(null);
+      toast.success(t.bookingDetail.statusUpdated);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t.bookingDetail.errorOccurred);
+      toast.error(t.bookingDetail.errorOccurred);
     } finally {
       setLoading(false);
     }

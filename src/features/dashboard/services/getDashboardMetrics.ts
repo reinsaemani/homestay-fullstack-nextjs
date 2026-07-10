@@ -9,7 +9,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const [
     totalBookings,
     activeGuests,
-    todayRevenueResult,
+    todayCheckedOutRev,
+    todayCancelledDP,
     pendingCheckIns,
     totalRevenueResult,
     piggyInResult,
@@ -19,8 +20,18 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     prisma.booking.count({ where: { status: { not: "CANCELLED" } } }),
     prisma.booking.count({ where: { status: "CHECKED_IN" } }),
     prisma.booking.aggregate({
+      _sum: { totalPrice: true },
+      where: {
+        status: "CHECKED_OUT",
+        checkOut: { gte: todayStart, lt: todayEnd },
+      },
+    }),
+    prisma.booking.aggregate({
       _sum: { downPayment: true },
-      where: { createdAt: { gte: todayStart, lt: todayEnd } },
+      where: {
+        status: "CANCELLED",
+        updatedAt: { gte: todayStart, lt: todayEnd },
+      },
     }),
     prisma.booking.count({
       where: {
@@ -29,7 +40,8 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       },
     }),
     prisma.booking.aggregate({
-      _sum: { totalPrice: true },
+      _sum: { downPayment: true },
+      where: { status: "CANCELLED" },
     }),
     prisma.piggyBank.aggregate({
       _sum: { amount: true },
@@ -48,13 +60,17 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     }),
   ]);
 
-  const totalRevenue = totalRevenueResult._sum.totalPrice
-    ? Number(totalRevenueResult._sum.totalPrice)
-    : 0;
+  const todayCheckedOut = Number(todayCheckedOutRev._sum.totalPrice) || 0;
+  const todayCancelled = Number(todayCancelledDP._sum.downPayment) || 0;
+  const todayRevenue = todayCheckedOut + todayCancelled;
 
-  const todayRevenue = todayRevenueResult._sum.downPayment
-    ? Number(todayRevenueResult._sum.downPayment)
-    : 0;
+  const totalCancelledDP = Number(totalRevenueResult._sum.downPayment) || 0;
+
+  const checkedOutTotal = await prisma.booking.aggregate({
+    _sum: { totalPrice: true },
+    where: { status: "CHECKED_OUT" },
+  });
+  const totalRevenue = (Number(checkedOutTotal._sum.totalPrice) || 0) + totalCancelledDP;
 
   const occupancyRate =
     activeToday > 0

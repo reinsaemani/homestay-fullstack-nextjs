@@ -6,6 +6,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { LocaleProvider } from "@/context/LocaleContext";
 import SessionProviderWrapper from "@/components/auth/SessionProviderWrapper";
 import HtmlLang from "@/components/common/HtmlLang";
+import SonnerProvider from "@/components/common/SonnerProvider";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -29,6 +30,7 @@ export default function RootLayout({
             <ThemeProvider>
               <SidebarProvider>
                 {children}
+                <SonnerProvider />
                 <HtmlLang />
               </SidebarProvider>
             </ThemeProvider>
