@@ -2,11 +2,18 @@
 import { useLocale } from "@/context/LocaleContext";
 import type { DashboardMetrics } from "../types";
 
-function formatK(value: number): string {
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}k`;
+function formatRupiah(value: number): string {
+  const parts = Math.round(value).toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `Rp ${parts.join(",")}`;
+}
+
+function formatRupiahAbbreviated(value: number): string {
+  if (value >= 1_000_000) {
+    const juta = value / 1_000_000;
+    return `Rp ${juta.toFixed(juta % 1 === 0 ? 0 : 1)}jt`;
   }
-  return String(value);
+  return formatRupiah(value);
 }
 
 interface TodayMetricsCardsProps {
@@ -28,7 +35,7 @@ export default function TodayMetricsCards({
     },
     {
       label: t.dashboard.todayRevenue,
-      value: `Rp ${formatK(metrics.todayRevenue)}`,
+      value: formatRupiahAbbreviated(metrics.todayRevenue),
     },
     {
       label: t.dashboard.pendingCheckIns,
@@ -36,7 +43,7 @@ export default function TodayMetricsCards({
     },
     {
       label: t.dashboard.piggyBank || "Celengan",
-      value: `Rp ${formatK(metrics.piggyBankTotal)}`,
+      value: formatRupiah(metrics.piggyBankTotal),
     },
   ];
 

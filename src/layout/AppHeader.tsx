@@ -1,8 +1,9 @@
 "use client";
 import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
-import UserDropdown from "@/components/header/UserDropdown";
+import UserDropdown from "@/features/auth/components/UserDropdown";
 import { useSidebar } from "@/context/SidebarContext";
 import { useLocale } from "@/context/LocaleContext";
+import { useTheme } from "@/context/ThemeContext";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
@@ -12,6 +13,7 @@ export default function AppHeader() {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+  const { toggleTheme } = useTheme();
 
   const handleToggle = () => {
     if (window.innerWidth >= 1024) {
@@ -161,7 +163,7 @@ export default function AppHeader() {
             } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
-            <ThemeToggleButton />
+            <ThemeToggleButton onToggle={toggleTheme} />
             <button
               onClick={() => setLocale(locale === "id" ? "en" : "id")}
               className="flex items-center justify-center w-10 h-10 text-xs font-medium text-gray-700 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 dark:text-gray-400 dark:bg-gray-900 dark:border-gray-800 dark:hover:bg-white/5"

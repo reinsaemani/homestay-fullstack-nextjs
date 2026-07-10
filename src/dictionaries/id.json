@@ -176,7 +176,8 @@
     "BOOKED": "Dipesan",
     "CHECKED_IN": "Check In",
     "CHECKED_OUT": "Check Out",
-    "CANCELLED": "Dibatalkan"
+    "CANCELLED": "Dibatalkan",
+    "LUNAS": "Lunas"
   },
   "error": {
     "404": {

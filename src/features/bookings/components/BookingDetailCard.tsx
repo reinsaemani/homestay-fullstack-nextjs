@@ -4,6 +4,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 import DateDisplay from "@/components/common/DateDisplay";
 import CurrencyDisplay from "@/components/common/CurrencyDisplay";
 import type { Booking } from "../types";
+import { STATUS_COLORS } from "../constants";
 import { useLocale } from "@/context/LocaleContext";
 
 interface SerializedBooking extends Omit<Booking, "pricePerNight" | "totalPrice" | "downPayment"> {
@@ -48,7 +49,17 @@ export default function BookingDetailCard({
       label: t.bookingDetail.remaining,
       value: <CurrencyDisplay amount={Number(booking.totalPrice) - Number(booking.downPayment)} />,
     },
-    { label: t.bookingDetail.status, value: <StatusBadge status={booking.status} /> },
+    {
+      label: t.bookingDetail.status,
+      value: (
+        <div className="flex items-center gap-2">
+          <StatusBadge label={(t.status as Record<string, string>)[booking.status] || booking.status} color={STATUS_COLORS[booking.status]} />
+          {(booking.status === "CHECKED_OUT" || Number(booking.downPayment) >= Number(booking.totalPrice)) && (
+            <StatusBadge label={(t.status as Record<string, string>)["LUNAS"] || "Lunas"} color={STATUS_COLORS["LUNAS"]} />
+          )}
+        </div>
+      ),
+    },
     { label: t.bookingDetail.note, value: booking.note || "—" },
     {
       label: t.bookingDetail.created,
@@ -64,9 +75,9 @@ export default function BookingDetailCard({
             <p className="mb-1 text-sm text-gray-500 dark:text-gray-400">
               {field.label}
             </p>
-            <p className="font-medium text-gray-800 dark:text-white/90">
+            <div className="font-medium text-gray-800 dark:text-white/90">
               {field.value}
-            </p>
+            </div>
           </div>
         ))}
       </div>

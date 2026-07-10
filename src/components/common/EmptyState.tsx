@@ -1,6 +1,5 @@
 "use client";
 import React from "react";
-import { useLocale } from "@/context/LocaleContext";
 
 interface EmptyStateProps {
   title?: string;
@@ -9,13 +8,10 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({
-  title,
-  description,
+  title = "No data",
+  description = "No records to display.",
   action,
 }: EmptyStateProps) {
-  const { t } = useLocale();
-  const resolvedTitle = title ?? t.common.noData;
-  const resolvedDescription = description ?? t.common.noRecords;
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100 dark:bg-white/[0.03]">
@@ -29,10 +25,10 @@ export default function EmptyState({
         </svg>
       </div>
       <h4 className="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-300">
-        {resolvedTitle}
+        {title}
       </h4>
       <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-        {resolvedDescription}
+        {description}
       </p>
       {action}
     </div>

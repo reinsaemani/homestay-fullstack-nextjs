@@ -1,4 +1,4 @@
-import SignInForm from "@/components/auth/SignInForm";
+import SignInForm from "@/features/auth/components/SignInForm";
 import type { Metadata } from "next";
 import React, { Suspense } from "react";
 import { getDictionary, hasLocale, defaultLocale } from "@/dictionaries";

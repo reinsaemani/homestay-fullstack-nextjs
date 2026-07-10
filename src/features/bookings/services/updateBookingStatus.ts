@@ -38,6 +38,7 @@ export async function updateBookingStatus(
       const checkOut = new Date(booking.checkOut);
       checkOut.setHours(h, m, 0, 0);
       data.checkOut = checkOut;
+      data.downPayment = booking.totalPrice;
     }
   }
 

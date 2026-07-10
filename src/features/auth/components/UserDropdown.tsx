@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { signOut, useSession } from "next-auth/react";
-import { Dropdown } from "../ui/dropdown/Dropdown";
-import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { Dropdown } from "@/components/ui/dropdown/Dropdown";
+import { DropdownItem } from "@/components/ui/dropdown/DropdownItem";
 import { useLocale } from "@/context/LocaleContext";
 
 export default function UserDropdown() {

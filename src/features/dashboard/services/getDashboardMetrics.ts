@@ -3,7 +3,7 @@ import type { DashboardMetrics } from "../types";
 
 export async function getDashboardMetrics(): Promise<DashboardMetrics> {
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const todayEnd = new Date(todayStart.getTime() + 86400000);
 
   const [
@@ -14,6 +14,7 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     totalRevenueResult,
     piggyInResult,
     piggyOutResult,
+    activeToday,
   ] = await Promise.all([
     prisma.booking.count({ where: { status: { not: "CANCELLED" } } }),
     prisma.booking.count({ where: { status: "CHECKED_IN" } }),
@@ -38,6 +39,13 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
       _sum: { amount: true },
       where: { type: "OUT" },
     }),
+    prisma.booking.count({
+      where: {
+        checkIn: { lte: todayEnd },
+        checkOut: { gte: todayStart },
+        status: { notIn: ["CANCELLED", "CHECKED_OUT"] },
+      },
+    }),
   ]);
 
   const totalRevenue = totalRevenueResult._sum.totalPrice
@@ -49,9 +57,9 @@ export async function getDashboardMetrics(): Promise<DashboardMetrics> {
     : 0;
 
   const occupancyRate =
-    totalBookings > 0
-      ? Math.round((activeGuests / totalBookings) * 100)
-      : 0;
+    activeToday > 0
+      ? Math.round((activeGuests / activeToday) * 100)
+      : activeGuests > 0 ? 100 : 0;
 
   const piggyBankTotal =
     (Number(piggyInResult._sum.amount) || 0) -

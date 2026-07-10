@@ -9,6 +9,7 @@ export async function createEntry(data: PiggyBankFormData) {
       description: data.description,
       amount: data.amount,
       type: data.type,
+      date: new Date(data.date + "T00:00:00.000Z"),
     },
   });
 }

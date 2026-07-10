@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useLocale } from "@/context/LocaleContext";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import Button from "@/components/ui/button/Button";
+import Pagination from "@/components/tables/Pagination";
 import {
   Table,
   TableBody,
@@ -12,6 +13,8 @@ import {
 } from "@/components/ui/table";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
+
+const REPORT_PAGE_SIZE = 10;
 
 type Period = "weekly" | "monthly" | "yearly";
 
@@ -39,6 +42,7 @@ export default function ReportsPage() {
   const [week, setWeek] = useState("01");
   const [data, setData] = useState<{ items: { date: string; income: number }[]; total: number } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [reportPage, setReportPage] = useState(1);
 
   const getValue = useCallback(() => {
     if (period === "yearly") return year;
@@ -48,6 +52,7 @@ export default function ReportsPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setReportPage(1);
     try {
       const value = getValue();
       const res = await fetch(`/api/reports/income?period=${period}&value=${value}`);
@@ -174,7 +179,7 @@ export default function ReportsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                      {data.items.map((item, idx) => (
+                      {data.items.slice((reportPage - 1) * REPORT_PAGE_SIZE, reportPage * REPORT_PAGE_SIZE).map((item, idx) => (
                         <TableRow key={idx}>
                           <TableCell className="px-5 py-4 sm:px-6 text-start">
                             <span className="font-medium text-gray-800 text-theme-sm dark:text-white/90">
@@ -192,6 +197,17 @@ export default function ReportsPage() {
                   </Table>
                 </div>
               </div>
+              {data.items.length > REPORT_PAGE_SIZE && (
+                <div className="flex justify-end px-5 py-4 border-t border-gray-100 dark:border-white/[0.05]">
+                  <Pagination
+                    currentPage={reportPage}
+                    totalPages={Math.ceil(data.items.length / REPORT_PAGE_SIZE)}
+                    onPageChange={setReportPage}
+                    previousLabel={t.common.previous}
+                    nextLabel={t.common.next}
+                  />
+                </div>
+              )}
               <div className="flex items-center justify-between border-t border-gray-100 px-5 py-4 dark:border-white/[0.05]">
                 <span className="text-sm font-semibold text-gray-800 dark:text-white/90">
                   {t.reports.totalIncome}

@@ -4,7 +4,7 @@ import InputField from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import DatePicker from "@/components/form/date-picker";
 import Button from "@/components/ui/button/Button";
-import CitySelect from "@/components/ui/city-select/CitySelect";
+import CitySelect from "@/features/common/components/CitySelect";
 import type { BookingFormData } from "../types";
 import { useLocale } from "@/context/LocaleContext";
 
@@ -23,10 +23,17 @@ function formatIdr(value: number): string {
   return Math.round(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+function toLocalDateString(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function calcNights(checkIn: string, checkOut: string): number {
   if (!checkIn || !checkOut) return 0;
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
+  const start = new Date(checkIn + "T00:00:00.000Z");
+  const end = new Date(checkOut + "T00:00:00.000Z");
   const diff = end.getTime() - start.getTime();
   return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
@@ -41,8 +48,8 @@ export default function BookingForm({
   const [city, setCity] = useState(initialData?.city || "");
 
   const [pricePerNight, setPricePerNight] = useState(initialData?.pricePerNight ?? 1_000_000);
-  const [checkIn, setCheckIn] = useState(initialData?.checkIn || new Date().toISOString().slice(0, 10));
-  const [checkOut, setCheckOut] = useState(initialData?.checkOut?.slice(0, 10) || "");
+  const [checkIn, setCheckIn] = useState(initialData?.checkIn || toLocalDateString(new Date()));
+  const [checkOut, setCheckOut] = useState(initialData?.checkOut || "");
   const [totalPrice, setTotalPrice] = useState(initialData?.totalPrice ?? 0);
   const [downPayment, setDownPayment] = useState(initialData?.downPayment ?? 0);
   const [priceDisplay, setPriceDisplay] = useState(formatIdr(initialData?.pricePerNight ?? 1_000_000));
@@ -74,14 +81,14 @@ export default function BookingForm({
   const handleCheckInChange = useCallback((dates: Date[]) => {
     if (dates[0]) {
       const d = dates[0];
-      setCheckIn(d.toISOString().slice(0, 10));
+      setCheckIn(toLocalDateString(d));
     }
   }, []);
 
   const handleCheckOutChange = useCallback((dates: Date[]) => {
     if (dates[0]) {
       const d = dates[0];
-      setCheckOut(d.toISOString().slice(0, 10));
+      setCheckOut(toLocalDateString(d));
     }
   }, []);
 
@@ -92,7 +99,7 @@ export default function BookingForm({
     const formData = new FormData(e.currentTarget);
     const nights = calcNights(checkIn, checkOut);
 
-    if (checkOut && new Date(checkOut) <= new Date(checkIn)) {
+    if (checkOut && new Date(checkOut + "T00:00:00.000Z") <= new Date(checkIn + "T00:00:00.000Z")) {
       setError(t.newBooking.checkOutAfterCheckIn);
       return;
     }
@@ -101,8 +108,8 @@ export default function BookingForm({
       guestName: formData.get("guestName") as string,
       phoneNumber: formData.get("phoneNumber") as string,
       city: city || undefined,
-      checkIn: new Date(checkIn).toISOString(),
-      checkOut: checkOut ? new Date(checkOut).toISOString() : new Date().toISOString(),
+      checkIn: new Date(checkIn + "T00:00:00.000Z").toISOString(),
+      checkOut: checkOut ? new Date(checkOut + "T00:00:00.000Z").toISOString() : new Date(checkIn + "T00:00:00.000Z").toISOString(),
       pricePerNight,
       totalPrice,
       downPayment,

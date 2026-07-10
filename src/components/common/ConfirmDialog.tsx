@@ -2,7 +2,6 @@
 import { Modal } from "@/components/ui/modal";
 import Button from "@/components/ui/button/Button";
 import React from "react";
-import { useLocale } from "@/context/LocaleContext";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -11,6 +10,8 @@ interface ConfirmDialogProps {
   title: string;
   message: string;
   confirmText?: string;
+  cancelText?: string;
+  processingText?: string;
   variant?: "primary" | "danger";
   loading?: boolean;
   children?: React.ReactNode;
@@ -22,13 +23,13 @@ export default function ConfirmDialog({
   onConfirm,
   title,
   message,
-  confirmText,
+  confirmText = "Confirm",
+  cancelText = "Cancel",
+  processingText = "Processing...",
   variant = "primary",
   loading = false,
   children,
 }: ConfirmDialogProps) {
-  const { t } = useLocale();
-  const resolvedConfirmText = confirmText ?? t.common.confirm;
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-[400px] p-6">
       <div className="text-center">
@@ -46,15 +47,15 @@ export default function ConfirmDialog({
             onClick={onClose}
             disabled={loading}
           >
-            {t.common.cancel}
+            {cancelText}
           </Button>
           <Button
-            variant={variant === "danger" ? "primary" : "primary"}
+            variant="primary"
             className={`flex-1 ${variant === "danger" ? "bg-error-500 hover:bg-error-600" : ""}`}
             onClick={onConfirm}
             disabled={loading}
           >
-            {loading ? t.common.processing : resolvedConfirmText}
+            {loading ? processingText : confirmText}
           </Button>
         </div>
       </div>

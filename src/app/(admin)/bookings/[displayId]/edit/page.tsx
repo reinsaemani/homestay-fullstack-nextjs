@@ -39,12 +39,19 @@ export default async function EditBookingPage({
     );
   }
 
+  function toLocalDateString(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
   const initialData = {
     guestName: booking.guestName,
     phoneNumber: booking.phoneNumber,
     city: booking.city || undefined,
-    checkIn: booking.checkIn.toISOString(),
-    checkOut: booking.checkOut.toISOString(),
+    checkIn: toLocalDateString(booking.checkIn),
+    checkOut: toLocalDateString(booking.checkOut),
     pricePerNight: Number(booking.pricePerNight),
     totalPrice: Number(booking.totalPrice),
     downPayment: Number(booking.downPayment),

@@ -9,9 +9,14 @@ import { useLocale } from "@/context/LocaleContext";
 const STATUS_COLORS: Record<string, string> = {
   BOOKED: "blue",
   CHECKED_IN: "green",
-  CHECKED_OUT: "gray",
   CANCELLED: "red",
 };
+
+const LEGEND_ITEMS = [
+  { label: "Pesan", color: "blue" },
+  { label: "Check In", color: "green" },
+  { label: "Batal", color: "red" },
+];
 
 export default function BookingCalendar() {
   const { t } = useLocale();
@@ -55,18 +60,20 @@ export default function BookingCalendar() {
     return () => abortRef.current?.abort();
   }, [currentMonth, fetchBookings]);
 
-  const events = bookings.map((booking) => ({
-    id: booking.id,
-    title: booking.guestName,
-    start: booking.checkIn,
-    end: booking.checkOut,
-    backgroundColor: STATUS_COLORS[booking.status] || "blue",
-    borderColor: STATUS_COLORS[booking.status] || "blue",
-    textColor: "#fff",
-    extendedProps: {
-      status: booking.status,
-    },
-  }));
+  const events = bookings
+    .filter((booking) => booking.status !== "CHECKED_OUT")
+    .map((booking) => ({
+      id: booking.id,
+      title: booking.guestName,
+      start: booking.checkIn,
+      end: booking.checkOut,
+      backgroundColor: STATUS_COLORS[booking.status] || "blue",
+      borderColor: STATUS_COLORS[booking.status] || "blue",
+      textColor: "#fff",
+      extendedProps: {
+        status: booking.status,
+      },
+    }));
 
   const handleDatesSet = (arg: { start: Date }) => {
     if (initialRef.current) {
@@ -84,6 +91,14 @@ export default function BookingCalendar() {
         <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-white/90">
           {t.landing.bookingCalendar}
         </h2>
+        <div className="mb-4 flex flex-wrap gap-4">
+          {LEGEND_ITEMS.map((item) => (
+            <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />

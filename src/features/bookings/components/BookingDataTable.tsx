@@ -13,6 +13,7 @@ import CurrencyDisplay from "@/components/common/CurrencyDisplay";
 import EmptyState from "@/components/common/EmptyState";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
 import type { Booking } from "../types";
+import { STATUS_COLORS } from "../constants";
 import { useLocale } from "@/context/LocaleContext";
 
 interface BookingDataTableProps {
@@ -116,7 +117,7 @@ export default function BookingDataTable({
                     <CurrencyDisplay amount={booking.totalPrice} />
                   </TableCell>
                   <TableCell className="px-4 py-3 text-start">
-                    <StatusBadge status={booking.status} />
+                    <StatusBadge label={(t.status as Record<string, string>)[booking.status] || booking.status} color={STATUS_COLORS[booking.status]} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -130,6 +131,8 @@ export default function BookingDataTable({
             currentPage={page}
             totalPages={totalPages}
             onPageChange={onPageChange}
+            previousLabel={t.common.previous}
+            nextLabel={t.common.next}
           />
         </div>
       )}

@@ -3,14 +3,18 @@ import React, { useState, useEffect, useCallback } from "react";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { formatIDR } from "@/components/common/CurrencyDisplay";
+import Pagination from "@/components/tables/Pagination";
 import { useLocale } from "@/context/LocaleContext";
 import ConfirmDialog from "@/components/common/ConfirmDialog";
+
+const PAGE_SIZE = 10;
 
 interface PiggyEntry {
   id: string;
   description: string;
   amount: number;
   type: "IN" | "OUT";
+  date: string;
   createdAt: string;
 }
 
@@ -24,27 +28,32 @@ export default function PiggyBankClient() {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<"IN" | "OUT">("IN");
+  function toLocalDateString(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  const [entryDate, setEntryDate] = useState(toLocalDateString(new Date()));
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [page, setPage] = useState(1);
 
   const fetchEntries = useCallback(async () => {
     try {
       const res = await fetch("/api/piggybank");
       const data = await res.json();
       setEntries(
-        data.entries.map((e: { id: string; description: string; amount: number; type: "IN" | "OUT"; createdAt: string }) => ({
+        data.entries.map((e: { id: string; description: string; amount: number; type: "IN" | "OUT"; date: string; createdAt: string }) => ({
           ...e,
           amount: Number(e.amount),
+          date: new Date(e.date).toLocaleDateString("id-ID"),
           createdAt: new Date(e.createdAt).toLocaleDateString("id-ID"),
         })),
       );
-      const totalVal = data.entries.reduce(
-        (acc: number, e: { type: string; amount: number }) =>
-          e.type === "IN" ? acc + Number(e.amount) : acc - Number(e.amount),
-        0,
-      );
-      setTotal(totalVal);
+      setTotal(data.balance);
     } catch {
       // silent
     } finally {
@@ -68,11 +77,13 @@ export default function PiggyBankClient() {
           description,
           amount: Number(amount),
           type,
+          date: entryDate,
         }),
       });
       setDescription("");
       setAmount("");
       setType("IN");
+      setEntryDate(toLocalDateString(new Date()));
       setShowForm(false);
       fetchEntries();
     } catch {
@@ -106,7 +117,7 @@ export default function PiggyBankClient() {
     const rows = entries
       .map(
         (e) =>
-          `"${e.description}",${e.type === "IN" ? e.amount : -e.amount},${e.type},${e.createdAt}`,
+          `"${e.description}",${e.type === "IN" ? e.amount : -e.amount},${e.type},${e.date}`,
       )
       .join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
@@ -133,6 +144,9 @@ export default function PiggyBankClient() {
     const digits = e.target.value.replace(/\D/g, "");
     setAmount(digits);
   };
+
+  const totalPages = Math.ceil(entries.length / PAGE_SIZE);
+  const paginatedEntries = entries.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (loading) {
     return <div className="text-gray-500">{t.common.loading}</div>;
@@ -194,7 +208,7 @@ export default function PiggyBankClient() {
                   </td>
                 </tr>
               )}
-              {entries.map((entry) => (
+              {paginatedEntries.map((entry) => (
                 <tr key={entry.id}>
                   <td className="px-5 py-4 text-sm font-medium text-gray-800 dark:text-white/90">
                     {entry.description}
@@ -215,7 +229,7 @@ export default function PiggyBankClient() {
                     </span>
                   </td>
                   <td className="px-5 py-4 text-sm text-gray-500 dark:text-gray-400">
-                    {entry.createdAt}
+                    {entry.date}
                   </td>
                   <td className="px-5 py-4 text-right">
                     <button
@@ -231,6 +245,18 @@ export default function PiggyBankClient() {
           </table>
         </div>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-end px-5 py-4">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            previousLabel={t.common.previous}
+            nextLabel={t.common.next}
+          />
+        </div>
+      )}
 
       <Modal isOpen={showForm} onClose={() => setShowForm(false)} className="max-w-[400px] p-6">
         <h3 className="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -260,6 +286,18 @@ export default function PiggyBankClient() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-800 dark:text-white/90"
               placeholder={t.piggyBank.amountPlaceholder}
               inputMode="numeric"
+              required
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t.piggyBank.date}
+            </label>
+            <input
+              type="date"
+              value={entryDate}
+              onChange={(e) => setEntryDate(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 dark:border-gray-600 dark:bg-gray-800 dark:text-white/90"
               required
             />
           </div>
@@ -298,6 +336,8 @@ export default function PiggyBankClient() {
         title={t.piggyBank.deleteTitle}
         message={t.piggyBank.deleteConfirmation}
         confirmText={t.common.delete}
+        cancelText={t.common.cancel}
+        processingText={t.common.processing}
         variant="danger"
         loading={deleting}
       />

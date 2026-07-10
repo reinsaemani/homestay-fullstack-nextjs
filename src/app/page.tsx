@@ -1,5 +1,5 @@
-import LandingHeader from "@/components/landing/LandingHeader";
-import BookingCalendar from "@/components/landing/BookingCalendar";
+import LandingHeader from "@/features/landing/components/LandingHeader";
+import BookingCalendar from "@/features/landing/components/BookingCalendar";
 import { getDictionary, hasLocale, defaultLocale } from "@/dictionaries";
 import { cookies } from "next/headers";
 

@@ -1,29 +1,21 @@
-"use client";
 import Badge from "@/components/ui/badge/Badge";
-import { useLocale } from "@/context/LocaleContext";
 
-type StatusColor = "success" | "warning" | "info" | "error";
-
-const STATUS_COLORS: Record<string, StatusColor> = {
-  BOOKED: "info",
-  CHECKED_IN: "success",
-  CHECKED_OUT: "warning",
-  CANCELLED: "error",
-};
+type AvailableColor = "primary" | "success" | "error" | "warning" | "info" | "light" | "dark";
 
 interface StatusBadgeProps {
-  status: string;
+  label: string;
+  color?: AvailableColor;
+  size?: "sm" | "md";
 }
 
-export default function StatusBadge({ status }: StatusBadgeProps) {
-  const { t } = useLocale();
-  const color = STATUS_COLORS[status] || "info";
-  const label = (t.status as Record<string, string>)[status] || status;
+export default function StatusBadge({
+  label,
+  color = "info",
+  size = "sm",
+}: StatusBadgeProps) {
   return (
-    <Badge size="sm" color={color}>
+    <Badge size={size} color={color}>
       {label}
     </Badge>
   );
 }
-
-export { STATUS_COLORS as STATUS_CONFIG };

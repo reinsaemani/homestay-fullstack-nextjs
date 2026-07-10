@@ -88,6 +88,7 @@ export default function BookingDetailActions({
         confirmText={
           confirmAction === "CANCELLED" ? t.bookingDetail.cancelBooking : t.bookingDetail.confirm
         }
+        cancelText={t.common.cancel}
         variant={confirmAction === "CANCELLED" ? "danger" : "primary"}
         loading={loading}
       >

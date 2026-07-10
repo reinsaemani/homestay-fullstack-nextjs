@@ -9,6 +9,7 @@ export async function getMonthlyRevenue(): Promise<MonthlyRevenueItem[]> {
   const bookings = await prisma.booking.findMany({
     where: {
       createdAt: { gte: startOfYear, lt: startOfNextYear },
+      status: { not: "CANCELLED" },
     },
     select: {
       totalPrice: true,

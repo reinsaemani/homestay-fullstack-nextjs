@@ -11,6 +11,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 import CurrencyDisplay from "@/components/common/CurrencyDisplay";
 import EmptyState from "@/components/common/EmptyState";
 import type { UpcomingBooking } from "../types";
+import { STATUS_COLORS } from "@/features/bookings/constants";
 
 function formatTime(date: Date): string {
   return new Date(date).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
@@ -73,7 +74,7 @@ export default function UpcomingBookings({ bookings }: UpcomingBookingsProps) {
                     <CurrencyDisplay amount={booking.totalPrice} />
                   </TableCell>
                   <TableCell className="px-4 py-3 text-center">
-                    <StatusBadge status={booking.status} />
+                    <StatusBadge label={(t.status as Record<string, string>)[booking.status] || booking.status} color={STATUS_COLORS[booking.status]} />
                   </TableCell>
                 </TableRow>
               ))}

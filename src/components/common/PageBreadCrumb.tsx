@@ -1,19 +1,26 @@
-"use client";
 import Link from "next/link";
-import { useLocale } from "@/context/LocaleContext";
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
 
 interface BreadcrumbProps {
   pageTitle: string;
+  items?: BreadcrumbItem[];
+  homeLabel?: string;
+  homeHref?: string;
 }
 
-export default function PageBreadcrumb({ pageTitle }: BreadcrumbProps) {
-  const { t } = useLocale();
+export default function PageBreadcrumb({
+  pageTitle,
+  items = [],
+  homeLabel = "Home",
+  homeHref = "/",
+}: BreadcrumbProps) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <h2
-        className="text-xl font-semibold text-gray-800 dark:text-white/90"
-        x-text="pageName"
-      >
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white/90">
         {pageTitle}
       </h2>
       <nav>
@@ -21,9 +28,9 @@ export default function PageBreadcrumb({ pageTitle }: BreadcrumbProps) {
           <li>
             <Link
               className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
-              href="/"
+              href={homeHref}
             >
-              {t.common.home}
+              {homeLabel}
               <svg
                 className="stroke-current"
                 width="17"
