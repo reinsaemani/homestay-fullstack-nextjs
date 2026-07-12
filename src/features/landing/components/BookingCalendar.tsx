@@ -26,6 +26,7 @@ export default function BookingCalendar() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   });
+  const [calendarKey, setCalendarKey] = useState(0);
 
   const abortRef = useRef<AbortController | null>(null);
   const initialRef = useRef(true);
@@ -75,26 +76,34 @@ export default function BookingCalendar() {
       },
     }));
 
-  const handleDatesSet = (arg: { start: Date }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleDatesSet = (arg: any) => {
     if (initialRef.current) {
       initialRef.current = false;
       return;
     }
-    const year = arg.start.getFullYear();
-    const month = String(arg.start.getMonth() + 1).padStart(2, "0");
-    setCurrentMonth(`${year}-${month}`);
+    // Use view.currentStart which is the actual start of the month view,
+    // NOT arg.start which is the first day of the calendar grid (includes prev month padding)
+    const viewStart = arg.view?.currentStart ?? arg.start;
+    const year = viewStart.getFullYear();
+    const month = String(viewStart.getMonth() + 1).padStart(2, "0");
+    const newMonth = `${year}-${month}`;
+    if (newMonth !== currentMonth) {
+      setCurrentMonth(newMonth);
+      setCalendarKey((k) => k + 1);
+    }
   };
 
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
-        <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-white/90">
+      <div className="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
+        <h2 className="mb-3 text-lg font-semibold text-gray-800 dark:text-white/90 sm:mb-4 sm:text-xl">
           {t.landing.bookingCalendar}
         </h2>
-        <div className="mb-4 flex flex-wrap gap-4">
+        <div className="mb-3 flex flex-wrap gap-3 sm:mb-4 sm:gap-4">
           {LEGEND_ITEMS.map((item) => (
-            <div key={item.label} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-              <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
+            <div key={item.label} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400 sm:gap-2 sm:text-sm">
+              <span className="inline-block h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3" style={{ backgroundColor: item.color }} />
               <span>{item.label}</span>
             </div>
           ))}
@@ -104,15 +113,18 @@ export default function BookingCalendar() {
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-500 border-t-transparent" />
           </div>
         )}
-        <div className={loading ? "opacity-40 pointer-events-none" : ""}>
+        <div className={`calendar-container ${loading ? "opacity-40 pointer-events-none" : ""}`}>
           <FullCalendar
+            key={calendarKey}
             plugins={[dayGridPlugin]}
             initialView="dayGridMonth"
+            initialDate={`${currentMonth}-01`}
             headerToolbar={{
               left: "prev,next today",
               center: "title",
               right: "",
             }}
+            dayMaxEvents={2}
             events={events}
             eventContent={renderEventContent}
             datesSet={handleDatesSet}

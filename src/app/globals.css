@@ -565,7 +565,7 @@ span.flatpickr-weekday,
   @apply p-2;
 }
 .fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
-  @apply rounded-sm bg-gray-100 dark:bg-white/[0.03];
+  @apply rounded-sm bg-gray-100 dark:bg-white/[0.12];
 }
 .fc .fc-daygrid-day-number {
   @apply !p-3 text-sm font-medium text-gray-700 dark:text-gray-400;
@@ -631,6 +631,56 @@ span.flatpickr-weekday,
 }
 .fc.fc-media-screen {
   @apply min-h-screen;
+}
+
+/* Booking Calendar - Mobile Responsive */
+@media (max-width: 639px) {
+  .calendar-container {
+    @apply -mx-3;
+  }
+  .calendar-container .fc .fc-toolbar.fc-header-toolbar {
+    @apply px-3 pt-4;
+  }
+  .calendar-container .fc-toolbar-title {
+    @apply !text-base;
+  }
+  .calendar-container .fc .fc-col-header-cell-cushion {
+    @apply !px-1 !py-3 text-xs;
+  }
+  .calendar-container .fc .fc-daygrid-day {
+    @apply !p-px;
+  }
+  .calendar-container .fc .fc-daygrid-day-number {
+    @apply !px-1 !py-0.5 text-[11px];
+  }
+  .calendar-container .fc-daygrid-day-top {
+    @apply !flex-row;
+  }
+  .calendar-container .fc .fc-event {
+    @apply !px-0.5 !py-px;
+  }
+  .calendar-container .fc .fc-event .fc-event-title {
+    @apply !text-[10px] !leading-tight;
+    font-size: 10px;
+  }
+  .calendar-container .fc .fc-daygrid-event-dot {
+    @apply !hidden;
+  }
+  .calendar-container .fc .fc-daygrid-more-link {
+    @apply !text-[10px] !text-brand-500 font-medium;
+  }
+  .calendar-container .fc .fc-daygrid-day.fc-day-today .fc-scrollgrid-sync-inner {
+    @apply !rounded-sm;
+  }
+  .calendar-container .fc-button-group {
+    @apply !gap-1.5;
+  }
+  .calendar-container .fc-button-group .fc-button {
+    @apply !h-8 !w-8;
+  }
+  .calendar-container .fc .fc-view-harness {
+    @apply overflow-x-auto no-scrollbar;
+  }
 }
 
 .input-date-icon::-webkit-inner-spin-button,
