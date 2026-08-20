@@ -17,7 +17,7 @@ export interface BookingFormData {
 export interface BookingFilters {
   page: number;
   limit: number;
-  status?: BookingStatus;
+  statuses?: BookingStatus[];
   search?: string;
   dateFrom?: string;
   dateTo?: string;

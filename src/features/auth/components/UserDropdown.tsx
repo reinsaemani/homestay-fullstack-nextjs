@@ -82,6 +82,8 @@ export default function UserDropdown() {
             <DropdownItem
               onItemClick={() => {
                 closeDropdown();
+                localStorage.removeItem("sessionStart");
+                localStorage.removeItem("sessionMaxAge");
                 signOut({ callbackUrl: "/" });
               }}
               tag="button"

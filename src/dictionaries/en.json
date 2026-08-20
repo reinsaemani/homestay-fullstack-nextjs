@@ -103,7 +103,9 @@
     "checkInFrom": "Check In From",
     "checkInTo": "Check In To",
     "filter": "Filter",
-    "clearFilter": "Clear Filter"
+    "clearFilter": "Clear Filter",
+    "allStatuses": "All Statuses",
+    "selectStatus": "Select Status"
   },
   "bookingDetail": {
     "title": "Booking Details - Bee Nirwana Homestay",

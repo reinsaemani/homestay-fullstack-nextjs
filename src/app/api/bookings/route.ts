@@ -7,11 +7,14 @@ import type { BookingStatus } from "@/features/bookings/types";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const statusParam = searchParams.get("status");
+    const statusesParam = searchParams.get("statuses");
+    const statuses = statusesParam
+      ? (statusesParam.split(",").filter(Boolean) as BookingStatus[])
+      : undefined;
     const bookings = await getBookings({
       page: Number(searchParams.get("page") || "1"),
       limit: Number(searchParams.get("limit") || "10"),
-      status: (statusParam as BookingStatus) || undefined,
+      statuses,
       search: searchParams.get("search") || undefined,
       dateFrom: searchParams.get("dateFrom") || undefined,
       dateTo: searchParams.get("dateTo") || undefined,

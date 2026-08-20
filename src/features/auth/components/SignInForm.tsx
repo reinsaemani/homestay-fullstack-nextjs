@@ -29,16 +29,23 @@ export default function SignInForm() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    const maxAge = isChecked ? 86400 : 3600;
+    const url = new URL(callbackUrl, window.location.origin);
+    url.searchParams.set("maxAge", String(maxAge));
+
     const result = await signIn("credentials", {
       email,
       password,
       redirect: false,
+      callbackUrl: url.toString(),
     });
 
     if (result?.error) {
       setError(t.auth.signIn.invalidCredentials);
       setLoading(false);
     } else {
+      localStorage.setItem("sessionStart", String(Date.now()));
+      localStorage.setItem("sessionMaxAge", String(maxAge));
       router.push(callbackUrl);
     }
   };

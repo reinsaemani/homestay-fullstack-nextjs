@@ -103,7 +103,9 @@
     "checkInFrom": "Check In Dari",
     "checkInTo": "Check In Sampai",
     "filter": "Filter",
-    "clearFilter": "Hapus Filter"
+    "clearFilter": "Hapus Filter",
+    "allStatuses": "Semua Status",
+    "selectStatus": "Pilih Status"
   },
   "bookingDetail": {
     "title": "Detail Pemesanan - Bee Nirwana Homestay",

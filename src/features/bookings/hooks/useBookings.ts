@@ -22,7 +22,7 @@ export const useBookings = (initialFilters: BookingFilters) => {
           page: String(filters.page),
           limit: String(filters.limit),
         });
-        if (filters.status) params.set("status", filters.status);
+        if (filters.statuses && filters.statuses.length > 0) params.set("statuses", filters.statuses.join(","));
         if (filters.search) params.set("search", filters.search);
         if (filters.dateFrom) params.set("dateFrom", filters.dateFrom);
         if (filters.dateTo) params.set("dateTo", filters.dateTo);
@@ -51,7 +51,7 @@ export const useBookings = (initialFilters: BookingFilters) => {
     return () => {
       mounted.current = false;
     };
-  }, [filters.page, filters.limit, filters.status, filters.search, filters.dateFrom, filters.dateTo]);
+  }, [filters.page, filters.limit, filters.statuses, filters.search, filters.dateFrom, filters.dateTo]);
 
   const updateFilters = useCallback(
     (partial: Partial<BookingFilters>) => {

@@ -7,8 +7,8 @@ export async function getBookings(
 ): Promise<BookingListResponse> {
   const where: Prisma.BookingWhereInput = {};
 
-  if (filters.status) {
-    where.status = filters.status;
+  if (filters.statuses && filters.statuses.length > 0) {
+    where.status = { in: filters.statuses };
   }
 
   if (filters.search) {
